@@ -1,0 +1,57 @@
+-- HW3
+
+
+/* Задание № 2 Придумать 2-3 таблицы для БД vk, которую мы создали на занятии (с перечнем полей, указанием индексов и внешних ключей). Прислать результат в виде скрипта *.sql.
+/* Возможные таблицы:
+/* a. Посты пользователя
+/* b. Лайки на посты пользователей, лайки на медиафайлы
+/* c. Черный список
+/* d. Школы, университеты для профиля пользователя
+/* e. Чаты (на несколько пользователей)
+/* f. Посты в сообществе
+
+-- Создание таблицы a. Посты пользователя
+
+CREATE TABLE IF NOT EXISTS user_posts (
+  user_posts_id bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id bigint UNSIGNED NOT NULL,
+  post_txt text NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_posts_id, user_id ),
+  INDEX fk_user_post_user_idx (user_id),
+  CONSTRAINT fk_user_post_users FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+
+DESCRIBE user_posts;
+
+-- Создание таблицы e. Чаты 
+
+CREATE TABLE IF NOT EXISTS chats (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name varchar(145) NOT NULL,
+  from_user_id BIGINT UNSIGNED NOT NULL,
+  to_user_id BIGINT UNSIGNED NOT NULL,
+  chat_txt text NOT NULL,
+  is_delivered BOOLEAN DEFAULT False,
+  description VARCHAR(245) DEFAULT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  INDEX fk_chats_from_user_idx (from_user_id),
+  INDEX fk_chats_to_user_idx (to_user_id),
+  CONSTRAINT fk_chats_users_1 FOREIGN KEY (from_user_id) REFERENCES users (id),
+  CONSTRAINT fk_chats_users_2 FOREIGN KEY (to_user_id) REFERENCES users (id)
+ );
+
+
+CREATE TABLE IF NOT EXISTS user_chat (
+  chat_id BIGINT UNSIGNED NOT NULL,
+  user_id BIGINT UNSIGNED NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+  PRIMARY KEY (chat_id, user_id),
+  INDEX fk_user_chat_chat_idx (chat_id),
+  INDEX fk_user_chat_users_idx (user_id),
+  CONSTRAINT fk_user_chat_chat FOREIGN KEY (chat_id) REFERENCES chats (id),
+  CONSTRAINT fk_user_chat_users FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
