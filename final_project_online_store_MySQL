@@ -1,63 +1,47 @@
 USE Online_store;
 
+
 SHOW tables;
+
 
 DROP TABLE IF EXISTS users;
 CREATE TABLE IF NOT EXISTS users (
   id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
   first_name VARCHAR (32) NOT NULL,
   last_name VARCHAR (32) NOT NULL,
-  gender char(1) NULL,
+  gender enum('f','m','x') NOT NULL,
   phone VARCHAR (20),
   email VARCHAR (128) NOT NULL,
-  dirthday_at DATETIME,
+  birthday_at DATETIME,
   city VARCHAR (50),
   country VARCHAR (50),
   password_hash char (65),
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  INDEX fk_users_first_name_idx (first_name),
-  INDEX fk_users_last_name_idx (last_name),
-  CONSTRAINT fk_users_orders FOREIGN KEY (id) REFERENCES orders (id)
+  created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  INDEX fk_users_first_email_idx (email)
 );
 
 
 DROP TABLE IF EXISTS catalogs;
 CREATE TABLE IF NOT EXISTS catalogs (
-  id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  products_id int UNSIGNED NOT NULL, 
-  name VARCHAR(245),
-  INDEX fk_catalogs_name_idx (name),
-  CONSTRAINT fk_catalogs_products FOREIGN KEY (products_id) REFERENCES products (id)
+  id int UNIQUE NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+  name VARCHAR(245)
 );
-
 
 
 DROP TABLE IF EXISTS products;
 CREATE TABLE IF NOT EXISTS products (
   id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  catalog_id INT UNSIGNED,
+  catalog_id int UNIQUE NOT NULL,
   name VARCHAR(245),
   desription TEXT,
   price DECIMAL(10.2),
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY index_of_catalog_id (catalog_id)
+  created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY index_of_catalog_id (catalog_id),
+  CONSTRAINT fk_products_catalogs FOREIGN KEY (catalog_id) REFERENCES catalogs (id)
  );
   
-
-ALTER TABLE products 
-ADD CONSTRAINT fk_products_catalogs 
-FOREIGN KEY (catalog_id) 
-REFERENCES catalogs (id);
-
-
-ALTER TABLE products
-ADD CONSTRAINT fk_products_orders_products
-FOREIGN KEY (id) 
-REFERENCES orders_products (id);
-
-
 
 DROP TABLE IF EXISTS orders;
 CREATE TABLE orders (
@@ -65,14 +49,8 @@ CREATE TABLE orders (
   user_id INT UNSIGNED NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY index_of_user_id (user_id)
+  CONSTRAINT fk_orders_user_id FOREIGN KEY (user_id) REFERENCES users (id)
 );
-
-
-ALTER TABLE orders 
-ADD CONSTRAINT fk_orders_users 
-FOREIGN KEY (user_id) 
-REFERENCES users (id);
 
 
 DROP TABLE IF EXISTS orders_products;
@@ -90,16 +68,13 @@ CREATE TABLE orders_products (
 );
   
 
-
 DROP TABLE IF EXISTS storehouses;
 CREATE TABLE storehouses (
   id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(245),
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY index_of_name (name)
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-
 
 
 DROP TABLE IF EXISTS storehouses_products;
@@ -110,7 +85,8 @@ CREATE TABLE storehouses_products (
   value INT UNSIGNED,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY index_of_storehouse_id (storehouse_id),
+  UNIQUE KEY index_of_storehouse_id_idx (storehouse_id),
+  UNIQUE KEY index_of_product_id_idx (product_id),
   CONSTRAINT fk_storehouses_products_storehouses FOREIGN KEY (storehouse_id) REFERENCES storehouses (id),
   CONSTRAINT fk_storehouses_products_products FOREIGN KEY (product_id) REFERENCES products (id)
 );
